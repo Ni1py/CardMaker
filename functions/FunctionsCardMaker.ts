@@ -90,13 +90,13 @@ function editCanvasSize(cardmaker: CardMaker, width: number, height: number): Ca
 }
 
 function installFilter(cardmaker: CardMaker, nameFilter: string): CardMaker {
-    let _filter: Filter
-    cardmaker.allFilters.forEach(function (filter) {
-        if (filter.name == nameFilter) {
-            _filter = {
-                name: filter.name,
-                color: filter.color,
-                transparency: filter.transparency,
+    let filter: Filter
+    cardmaker.allFilters.forEach(function (_filter) {
+        if (_filter.name == nameFilter) {
+            filter = {
+                name: _filter.name,
+                color: _filter.color,
+                transparency: _filter.transparency,
             }
         }; 
     });
@@ -104,7 +104,7 @@ function installFilter(cardmaker: CardMaker, nameFilter: string): CardMaker {
         ...cardmaker,
         canvas: {
             ...cardmaker.canvas,
-            currentFilter: {..._filter}
+            currentFilter: {...filter}
         },
     };
 }
@@ -325,27 +325,27 @@ function addImgElement(cardmaker: CardMaker, elementId: number, src: string, wid
 }
 
 function deleteComponents(cardmaker: CardMaker): CardMaker {
-    let _elementList = [...cardmaker.canvas.elementList];
+    let elementList = [...cardmaker.canvas.elementList];
 
     cardmaker.selectedElements.forEach(function (elementId) {
-        _elementList.splice(elementId, 1); //*
+        elementList.splice(elementId, 1);
     });
     return {
         ...cardmaker,
         canvas: {
             ...cardmaker.canvas,
             elementList: [
-                ..._elementList,
+                ...elementList,
             ],
         },
     };
 }
 
 function moveComponents(cardmaker: CardMaker, newX: number, newY: number): CardMaker {
-    let _elementList = [...cardmaker.canvas.elementList];
+    let elementList = [...cardmaker.canvas.elementList];
     
     cardmaker.selectedElements.forEach(function (elementId) {
-        _elementList.splice(elementId, 1,
+        elementList.splice(elementId, 1,
             {
                 ...cardmaker.canvas.elementList[elementId],
                 posX: cardmaker.canvas.elementList[elementId].posX + newX,
@@ -358,7 +358,7 @@ function moveComponents(cardmaker: CardMaker, newX: number, newY: number): CardM
         canvas: {
             ...cardmaker.canvas,
             elementList: [
-                ..._elementList,
+                ...elementList,
             ],
         },
     };
@@ -367,6 +367,7 @@ function moveComponents(cardmaker: CardMaker, newX: number, newY: number): CardM
 function undo(cardmaker: CardMaker): CardMaker {
     return {
         ...cardmaker,
+        canvas: {...cardmaker.history.listState[cardmaker.history.currentIndex - 1]},
         history: {
             ...cardmaker.history,
             currentIndex: cardmaker.history.currentIndex - 1,
@@ -377,6 +378,7 @@ function undo(cardmaker: CardMaker): CardMaker {
 function redo(cardmaker: CardMaker): CardMaker {
     return {
         ...cardmaker,
+        canvas: {...cardmaker.history.listState[cardmaker.history.currentIndex + 1]},
         history: {
             ...cardmaker.history,
             currentIndex: cardmaker.history.currentIndex + 1,
@@ -385,17 +387,17 @@ function redo(cardmaker: CardMaker): CardMaker {
 }
 
 function addCanvasInHistory(cardmaker: CardMaker, canvas: Canvas): CardMaker {
-    let _history: ActionHistory = cardmaker.history;
-    let _listState: Canvas[] = [..._history.listState];
-    if (_history.currentIndex !== _history.listState.length - 1) {
-        _listState.splice(_history.currentIndex + 1, _history.listState.length);
+    let history: ActionHistory = cardmaker.history;
+    let listState: Canvas[] = [...history.listState];
+    if (history.currentIndex !== history.listState.length - 1) {
+        listState.splice(history.currentIndex + 1, history.listState.length);
     }
-    _listState.push(canvas);
+    listState.push(canvas);
     return {
         ...cardmaker,
         history: {
-            listState: _listState,
-            currentIndex: _history.currentIndex + 1,
+            listState: listState,
+            currentIndex: history.currentIndex + 1,
         }
     }
 }
